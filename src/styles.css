@@ -1,3 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@layer components {
+  .app-container {
+    @apply min-h-screen flex flex-col;
+  }
+
+  .content-wrapper {
+    @apply flex flex-1 overflow-hidden; /* Evita scrolls innecesarios */
+  }
+
+  .main-content {
+    @apply flex-1 p-4 md:p-8 bg-slate-50 overflow-y-auto; /* Scroll interno para el contenido */
+  }
+}

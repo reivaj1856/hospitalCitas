@@ -1,0 +1,204 @@
+<div class="admin-shell p-8 max-w-7xl mx-auto">
+  <div class="action-bar flex gap-4 mb-8">
+    <button (click)="openAppointmentModal()" class="action-button action-button--primary bg-white text-gray-700 px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-blue-100">+ Crear Cita</button>
+    <button (click)="openPatientModal()" class="action-button action-button--primary bg-white text-gray-700 px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-blue-100">Crear Paciente</button>
+  </div>
+  <div class="table-card bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="appointments-table w-full text-left">
+      <thead class="table-head bg-gray-50 text-gray-400 uppercase text-xs">
+        <tr>
+          <th class="p-6">Fecha</th>
+          <th class="p-6">Doctor</th>
+          <th class="p-6">Paciente</th>
+          <th class="p-6">Tipo</th>
+          <th class="p-6 text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="appointments-body">
+        @for (app of appointments(); track app.id) {
+          <tr class="appointment-row border-t hover:bg-blue-50/50 transition">
+            <td class="p-6">{{ formatAppointmentDate(app.start_time) }}</td>
+            <td class="p-6 font-semibold">{{ app.profiles?.full_name }}</td>
+            <td class="p-6">{{ app.patients?.full_name }}</td>
+            <td class="p-6 text-gray-500">{{ app.appointment_types?.name }}</td>
+            <td class="p-6">
+              <div class="flex justify-end gap-2 flex-wrap">
+                <button type="button" (click)="openAppointmentDetail(app)" class="action-pill action-pill--view px-3 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">Ver</button>
+                <button type="button" (click)="openAppointmentEdit(app)" class="action-pill action-pill--edit px-3 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Editar</button>
+                <button type="button" (click)="deleteAppointment(app)" class="action-pill action-pill--delete px-3 py-2 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition">Eliminar</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (activeAppointmentMode && selectedAppointment) {
+  <div class="fixed inset-0 z-1100 flex items-center justify-center p-4">
+    <div (click)="closeAppointmentInspector()" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+    <div class="modal-surface bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-white/60 relative">
+      @if (activeAppointmentMode === 'detail') {
+        <h2 class="text-2xl font-bold text-blue-900 mb-6">Detalle de la cita</h2>
+
+        <div class="grid gap-4 md:grid-cols-2 text-sm">
+          <div class="rounded-2xl bg-slate-50 p-4">
+            <p class="text-slate-500 mb-1">Paciente</p>
+            <p class="font-semibold text-slate-900">{{ selectedAppointment.patients?.full_name }}</p>
+          </div>
+          <div class="rounded-2xl bg-slate-50 p-4">
+            <p class="text-slate-500 mb-1">Doctor</p>
+            <p class="font-semibold text-slate-900">{{ selectedAppointment.profiles?.full_name }}</p>
+          </div>
+          <div class="rounded-2xl bg-slate-50 p-4 md:col-span-2">
+            <p class="text-slate-500 mb-1">Horario de la consulta</p>
+            <p class="font-semibold text-slate-900">{{ formatAppointmentDate(selectedAppointment.start_time) }}</p>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-end gap-3">
+          <button type="button" (click)="closeAppointmentInspector()" class="px-5 py-3 rounded-xl bg-gray-100 font-bold">Cerrar</button>
+          <button type="button" (click)="openAppointmentEdit(selectedAppointment)" class="px-5 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700">Editar</button>
+        </div>
+      }
+
+      @if (activeAppointmentMode === 'edit') {
+        <h2 class="text-2xl font-bold text-blue-900 mb-6">Editar cita</h2>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="rounded-2xl bg-slate-50 p-4 md:col-span-2">
+            <p class="text-slate-500 mb-1 text-sm">Paciente</p>
+            <p class="font-semibold text-slate-900">{{ selectedAppointment.patients?.full_name }}</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Doctor</label>
+            <select [(ngModel)]="editAppointment.doctor_id" class="w-full p-3 rounded-xl bg-white border border-gray-200">
+              @for (doctor of doctors(); track doctor.id) {
+                <option [value]="doctor.id">{{ doctor.full_name }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Horario</label>
+            <input [(ngModel)]="editAppointment.start_time" type="datetime-local" class="w-full p-3 rounded-xl bg-white border border-gray-200">
+          </div>
+        </div>
+
+        @if (statusMessage) {
+          <p class="mt-4 text-sm font-semibold" [class.text-green-600]="isSuccess" [class.text-red-600]="!isSuccess">{{ statusMessage }}</p>
+        }
+
+        <div class="mt-8 flex justify-end gap-3">
+          <button type="button" (click)="closeAppointmentInspector()" class="px-5 py-3 rounded-xl bg-gray-100 font-bold">Cancelar</button>
+          <button type="button" (click)="updateAppointment()" class="px-5 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700">Guardar cambios</button>
+        </div>
+      }
+    </div>
+  </div>
+}
+@if (isPatientModalOpen) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div (click)="isPatientModalOpen = false" class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+
+    <div class="modal-surface modal-surface--soft bg-white/70 backdrop-blur-xl p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/50 relative">
+      
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Registrar Paciente</h2>
+
+      <div class="space-y-4">
+        <input [(ngModel)]="newPatient.full_name" type="text" placeholder="Nombre completo" class="w-full p-3 rounded-xl bg-white/50 border border-white/50 outline-none focus:ring-2 focus:ring-blue-400">
+        <input [(ngModel)]="newPatient.email" type="email" placeholder="Correo electrónico" class="w-full p-3 rounded-xl bg-white/50 border border-white/50 outline-none focus:ring-2 focus:ring-blue-400">
+        <input [(ngModel)]="newPatient.phone" type="tel" placeholder="Teléfono" class="w-full p-3 rounded-xl bg-white/50 border border-white/50 outline-none focus:ring-2 focus:ring-blue-400">
+        <input [(ngModel)]="newPatient.birth_date" type="date" class="w-full p-3 rounded-xl bg-white/50 border border-white/50 outline-none focus:ring-2 focus:ring-blue-400">
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button (click)="isPatientModalOpen = false" class="flex-1 py-3 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold">Cancelar</button>
+        <button (click)="savePatient()" 
+        [disabled]="!newPatient.full_name || !newPatient.email"
+        class="flex-1 py-3 rounded-xl font-bold transition-all"
+        [class.bg-blue-600]="newPatient.full_name && newPatient.email"
+        [class.text-white]="newPatient.full_name && newPatient.email"
+        [class.bg-gray-300]="!newPatient.full_name || !newPatient.email"
+        [class.text-gray-500]="!newPatient.full_name || !newPatient.email"
+        [class.cursor-not-allowed]="!newPatient.full_name || !newPatient.email">
+  {{ (statusMessage && isSuccess) ? 'Guardado' : 'Guardar' }}
+</button>
+</div>
+
+      @if (statusMessage && !isSuccess) {
+        <p class="mt-4 text-sm text-red-600 font-semibold">{{ statusMessage }}</p>
+      }
+    </div>
+  </div>
+}
+@if (isAppointmentModalOpen) {
+  <div class="fixed inset-0 z-1000 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    
+    <div class="modal-surface bg-white/90 backdrop-blur-xl p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 relative">
+      
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Nueva Cita</h2>
+
+      <div class="space-y-4">
+        <div class="relative">
+          <label class="block text-sm font-semibold text-gray-700">Paciente</label>
+          <input type="text" [(ngModel)]="patientSearch" (focus)="showPatientList = true"
+                 placeholder="Escribe para buscar paciente..." 
+                 class="w-full p-3 rounded-xl bg-white border border-gray-200">
+          
+          @if (showPatientList && patientSearch.length > 0) {
+            <div class="absolute z-1001 w-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 max-h-48 overflow-y-auto">
+              @for (p of filteredPatients(); track p.id) {
+                <div (click)="selectPatient(p)" class="p-3 hover:bg-blue-50 cursor-pointer text-sm">
+                  {{ p.full_name }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label class="block text-sm font-semibold text-gray-700">Doctor</label>
+          <input type="text" [(ngModel)]="doctorSearch" (focus)="showDoctorList = true"
+                 placeholder="Escribe para buscar doctor..." 
+                 class="w-full p-3 rounded-xl bg-white border border-gray-200">
+          
+          @if (showDoctorList && doctorSearch.length > 0) {
+            <div class="absolute z-1001 w-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 max-h-48 overflow-y-auto">
+              @for (d of filteredDoctors(); track d.id) {
+                <div (click)="selectDoctor(d)" class="p-3 hover:bg-blue-50 cursor-pointer text-sm">
+                  {{ d.full_name }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <label class="block text-sm font-semibold text-gray-700">Fecha y Hora</label>
+        <input [(ngModel)]="newAppointment.start_time" type="datetime-local" class="w-full p-3 rounded-xl bg-white border border-gray-200">
+      </div>
+
+      @if (statusMessage) {
+        <p class="mt-4 text-sm font-semibold" [class.text-green-600]="isSuccess" [class.text-red-600]="!isSuccess">{{ statusMessage }}</p>
+      }
+
+      <div class="flex gap-3 mt-8">
+  <button type="button" 
+          (click)="isAppointmentModalOpen = false" 
+          class="flex-1 py-3 rounded-xl bg-gray-100 font-bold">
+    Cancelar
+  </button>
+
+  <button type="button" 
+          (click)="saveAppointment()" 
+          [disabled]="isSaving()"
+          class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold">
+    {{ isSaving() ? 'Guardando...' : 'Confirmar Cita' }}
+  </button>
+</div>
+    </div>
+  </div>
+}

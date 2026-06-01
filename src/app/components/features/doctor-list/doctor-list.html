@@ -1,0 +1,32 @@
+<section class="doctor-panel mb-8 ">
+  <div class="doctor-panel__header">
+    <div>
+      <p class="doctor-panel__eyebrow">Equipo médico</p>
+      <h2 class="doctor-panel__title">Lista de doctores</h2>
+      <p class="doctor-panel__subtitle">Vista compacta para revisar los perfiles activos desde el panel de administración.</p>
+    </div>
+
+    <button type="button" class="doctor-panel__button" (click)="registerDoctor.emit()">
+      Registrar doctor
+    </button>
+  </div>
+
+  @if (doctors().length === 0) {
+    <div class="doctor-panel__empty">
+      <p class="doctor-panel__empty-title">Todavía no hay doctores cargados</p>
+      <p class="doctor-panel__empty-text">Usa el botón de registro para crear el primer perfil médico.</p>
+    </div>
+  } @else {
+    <div class="doctor-grid">
+      @for (doctor of doctors(); track doctor.id) {
+        <article class="doctor-card">
+          <div class="doctor-card__avatar">{{ getDoctorInitials(doctor.full_name) }}</div>
+          <div class="doctor-card__body">
+            <p class="doctor-card__name">{{ doctor.full_name }}</p>
+            <p class="doctor-card__role">{{ doctor.role ?? 'Doctor' }}</p>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

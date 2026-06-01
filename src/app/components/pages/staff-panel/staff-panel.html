@@ -1,0 +1,214 @@
+<div class="staff-panel">
+  <section class="staff-panel__hero mb-8">
+    <div class="staff-panel__cover">
+      <div class="staff-panel__avatar">RP</div>
+
+      <div class="staff-panel__hero-copy">
+        <p class="staff-panel__eyebrow">Panel de recepción</p>
+        <h1 class="staff-panel__title">Grupo de atención</h1>
+        <p class="staff-panel__subtitle">En esta ventana solo se muestran las citas de hoy, junto con los pacientes y movimientos del día.</p>
+      </div>
+    </div>
+
+    <div class="staff-panel__actions">
+      <button (click)="openModal('patient')" class="staff-panel__action staff-panel__action--primary">Registrar paciente</button>
+      <button (click)="openModal('appointment')" class="staff-panel__action staff-panel__action--secondary">Nueva cita</button>
+      <button (click)="openModal('history')" class="staff-panel__action staff-panel__action--ghost">Ver historial</button>
+    </div>
+  </section>
+
+  <section class="staff-panel__feed">
+    @for (group of appointmentGroups; track group.hourLabel) {
+      <div class="time-group">
+        <div class="time-group__header">
+          <div>
+            <p class="time-group__eyebrow">Hora</p>
+            <h3 class="time-group__title">{{ group.hourLabel }}</h3>
+          </div>
+          <span class="time-group__count">{{ group.items.length }} cita(s)</span>
+        </div>
+
+        <div class="time-group__grid">
+          @for (app of group.items; track app.id) {
+            <article class="appointment-card">
+              <div class="appointment-card__top">
+                <div class="appointment-card__avatar">{{ app.patients?.full_name?.charAt(0) ?? 'P' }}</div>
+                <div class="appointment-card__meta">
+                  <p class="appointment-card__name">{{ app.patients?.full_name }}</p>
+                  <p class="appointment-card__submeta">{{ app.appointment_types?.name }}</p>
+                </div>
+              </div>
+
+              <div class="appointment-card__body">
+                <p class="appointment-card__line"><span>Doctor</span>{{ app.profiles?.full_name }}</p>
+                <p class="appointment-card__line"><span>Hora</span>{{ formatHour(app.start_time) }}</p>
+              </div>
+
+              <div class="appointment-card__actions">
+                <button (click)="openModal('detail', app)" class="appointment-card__button appointment-card__button--soft">Ver detalles</button>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    }
+  </section>
+</div>
+
+@if (activeModal === 'appointment') {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div (click)="closeModal()" class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+
+    <div class="bg-white/95 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-lg relative border border-white/50 modal-surface">
+      <div class="modal-top">
+        <div class="modal-top__icon">+</div>
+        <div>
+          <p class="modal-top__eyebrow">Nueva cita</p>
+          <h2 class="modal-top__title">Registrar cita</h2>
+          <p class="modal-top__subtitle">Completa los datos para agendar una nueva cita.</p>
+        </div>
+      </div>
+
+      <div class="appointment-form">
+        <select [(ngModel)]="newAppointment.patient_id" class="appointment-form__field">
+          <option value="">Selecciona paciente</option>
+          @for (patient of patients; track patient.id) {
+            <option [value]="patient.id">{{ patient.full_name }}</option>
+          }
+        </select>
+
+        <select [(ngModel)]="newAppointment.doctor_id" class="appointment-form__field">
+          <option value="">Selecciona doctor</option>
+          @for (doctor of doctors; track doctor.id) {
+            <option [value]="doctor.id">{{ doctor.full_name }}</option>
+          }
+        </select>
+
+        <select [(ngModel)]="newAppointment.type_id" class="appointment-form__field">
+          <option value="">Tipo de cita</option>
+          @for (type of appointmentTypes; track type.id) {
+            <option [value]="type.id">{{ type.name }}</option>
+          }
+        </select>
+
+        <input [(ngModel)]="newAppointment.start_time" type="datetime-local" class="appointment-form__field" />
+      </div>
+
+      @if (statusMessage) {
+        <p class="mt-4 font-semibold" [class.text-emerald-600]="isSuccess" [class.text-red-600]="!isSuccess">
+          {{ statusMessage }}
+        </p>
+      }
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button (click)="closeModal()" class="px-4 py-2 text-gray-500">Cerrar</button>
+        <button (click)="saveAppointment()" class="bg-blue-600 text-white px-4 py-2 rounded" [disabled]="isSavingAppointment">
+          {{ isSavingAppointment ? 'Guardando...' : 'Guardar cita' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (activeModal === 'detail' && selectedAppointment) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div (click)="closeModal()" class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+
+    <div class="bg-white/95 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-lg relative border border-white/50 modal-surface">
+      <div class="modal-top">
+        <div class="modal-top__icon">{{ selectedAppointment.patients?.full_name?.charAt(0) ?? 'P' }}</div>
+        <div>
+          <p class="modal-top__eyebrow">Detalle de cita</p>
+          <h2 class="modal-top__title">{{ selectedAppointment.patients?.full_name }}</h2>
+          <p class="modal-top__subtitle">{{ selectedAppointment.appointment_types?.name }} · {{ formatDate(selectedAppointment.start_time) }}</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-item__label">Doctor</span>
+          <span class="detail-item__value">{{ selectedAppointment.profiles?.full_name }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-item__label">Hora</span>
+          <span class="detail-item__value">{{ formatHour(selectedAppointment.start_time) }}</span>
+        </div>
+        <div class="detail-item detail-item--full">
+          <span class="detail-item__label">Paciente</span>
+          <span class="detail-item__value">{{ selectedAppointment.patients?.full_name }}</span>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button (click)="closeModal()" class="px-4 py-2 text-gray-500">Cerrar</button>
+        <button (click)="deleteApp(selectedAppointment.id)" class="bg-red-600 text-white px-4 py-2 rounded">Eliminar</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (activeModal === 'history') {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div (click)="closeModal()" class="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"></div>
+
+    <div class="bg-white/95 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-4xl relative border border-white/50 modal-surface max-h-[85vh] overflow-hidden flex flex-col">
+      <div class="modal-top">
+        <div class="modal-top__icon">H</div>
+        <div>
+          <p class="modal-top__eyebrow">Historial completo</p>
+          <h2 class="modal-top__title">Todas las citas</h2>
+          <p class="modal-top__subtitle">Aquí aparecen todas las citas registradas en el sistema.</p>
+        </div>
+      </div>
+
+      <div class="history-list">
+        @if (allAppointments.length === 0) {
+          <div class="staff-panel__empty">Todavía no hay citas registradas.</div>
+        } @else {
+          @for (appointment of allAppointments; track appointment.id) {
+            <article class="history-item">
+              <div class="history-item__main">
+                <p class="history-item__title">{{ appointment.patients?.full_name }}</p>
+                <p class="history-item__meta">{{ appointment.appointment_types?.name }} · {{ formatDateTime(appointment.start_time) }}</p>
+              </div>
+              <div class="history-item__side">
+                <span>{{ appointment.profiles?.full_name }}</span>
+                <button (click)="openModal('detail', appointment)" class="history-item__button">Ver</button>
+              </div>
+            </article>
+          }
+        }
+      </div>
+
+      <div class="mt-6 flex justify-end gap-3">
+        <button (click)="closeModal()" class="px-6 py-2 rounded-xl text-gray-600 hover:bg-gray-100 transition">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (activeModal === 'patient') {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div (click)="closeModal()" class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+
+    <div class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-sm relative border border-white/50">
+      <h2 class="text-2xl font-extrabold text-blue-900 mb-6">Nuevo Paciente</h2>
+
+      <div class="space-y-4">
+        <input #name type="text" placeholder="Nombre completo" class="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none">
+        <input #email type="email" placeholder="Correo electrónico" class="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none">
+        <input #phone type="tel" placeholder="Teléfono" class="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none">
+        <input #birthDate type="date" class="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none">
+        <textarea #history placeholder="Historial médico" class="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none"></textarea>
+      </div>
+
+      <div class="mt-8 flex flex-col gap-3">
+        <button (click)="savePatient(name.value, email.value, phone.value, history.value, birthDate.value)" 
+          class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg transition hover:scale-[1.02]">
+          Guardar Paciente
+        </button>
+        <button (click)="closeModal()" class="w-full text-gray-500 hover:text-gray-800">Cancelar</button>
+      </div>
+    </div>
+  </div>
+}

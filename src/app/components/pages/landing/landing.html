@@ -1,0 +1,159 @@
+<!-- HERO -->
+<header class="relative h-[480px] flex items-center justify-center overflow-hidden rounded-xl group">
+  <img
+    src="https://cdn.prod.website-files.com/67322e8e41a720f403a90412/67f823edc8c86e406fc459a4_Articulos%20sobre%20Doctores.jpg"
+    alt="Clínica COCHA"
+    class="absolute inset-0 w-full h-full object-cover transition-transform duration-[8000ms] ease-out group-hover:scale-105 z-0"
+  />
+  <div class="absolute inset-0 bg-gradient-to-b from-slate-900/40 to-slate-900/70 z-10"></div>
+
+  <div class="relative z-20 text-center text-white px-4">
+    <span 
+          class="inline-block bg-white/15 border border-white/30 text-xs px-4 py-1 rounded-full tracking-wide mb-4
+                 transition-all duration-700">
+      Salud &amp; Bienestar
+    </span>
+    <h1
+        class="text-4xl font-medium tracking-tight
+               transition-all duration-700">
+      Bienvenido a Clínica COCHA
+    </h1>
+    <p 
+       class="mt-3 text-base text-white/80
+              transition-all duration-700">
+      Brindando salud y bienestar a toda tu familia.
+    </p>
+    <button 
+            class="mt-6 bg-white text-blue-700 font-medium text-sm px-6 py-2.5 rounded-full
+                   hover:-translate-y-0.5 transition-all duration-700">
+      Agendar cita →
+    </button>
+  </div>
+</header>
+
+<!-- STATS -->
+<section class="py-12 max-w-6xl mx-auto px-4">
+
+  <div data-reveal
+       class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12 opacity-0 translate-y-8 transition-all duration-700">
+    <div *ngFor="let s of stats" class="bg-gray-50 rounded-lg p-4 text-center">
+      <p class="text-5xl font-medium text-gray-900">{{ s.num }}</p>
+      <p class="text-2xs text-gray-500 mt-1">{{ s.lbl }}</p>
+    </div>
+  </div>
+
+  <h2 data-reveal
+      class="text-4xl font-medium text-center text-gray-900 mb-2 opacity-0 translate-y-8 transition-all duration-700">
+    Nuestros servicios
+  </h2>
+  <p data-reveal
+     class="text-2sm text-center text-gray-500 mb-8 opacity-0 translate-y-8 transition-all duration-700 delay-100">
+    Tecnología de vanguardia al servicio de su salud
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <div *ngFor="let s of services; let i = index"
+         data-reveal
+         [class]="'opacity-0 transition-all duration-700 ' + (i % 2 === 0 ? '-translate-x-8' : 'translate-x-8') + ' bg-white border border-gray-100 rounded-xl overflow-hidden group hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10'">
+      <div class="overflow-hidden">
+        <img [src]="s.img" [alt]="s.alt"
+             class="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105" />
+      </div>
+      <div class="p-4">
+        <h3 class="text-2sm font-medium text-gray-900 mb-1.5">{{ s.title }}</h3>
+        <p class="text-2xs text-gray-500 leading-relaxed">{{ s.desc }}</p>
+        <button class="mt-3 text-2xs font-medium text-blue-600 hover:gap-2 transition-all duration-200">
+          Leer más →
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="border-gray-100" />
+
+<!-- ESPECIALIDADES -->
+<section class="bg-gray-50 py-12">
+  <div class="max-w-6xl mx-auto px-4">
+
+    <h2 data-reveal
+        class="text-4xl font-medium text-center text-gray-900 mb-2 opacity-0 translate-y-8 transition-all duration-700">
+      Nuestras especialidades
+    </h2>
+    <p data-reveal
+       class="text-sm text-center text-gray-500 mb-8 opacity-0 translate-y-8 transition-all duration-700 delay-100">
+      Atención integral para cada etapa de su vida
+    </p>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div *ngFor="let sp of specialties; let i = index"
+           data-reveal
+           [style]="'transition-delay:' + (i * 100) + 'ms'"
+           class="opacity-0 scale-95 transition-all duration-700 bg-white border border-gray-100 rounded-xl overflow-hidden text-center hover:-translate-y-1 hover:shadow-md group">
+        <div class="overflow-hidden">
+          <img [src]="sp.img" [alt]="sp.alt"
+               class="w-full h-28 object-cover transition-transform duration-500 group-hover:scale-105" />
+        </div>
+        <div class="p-3">
+          <h4 class="text-2xs font-medium text-gray-900 mb-1">{{ sp.title }}</h4>
+          <p class="text-2xs text-gray-500 leading-relaxed">{{ sp.desc }}</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="border-gray-100" />
+
+<!-- DOCTORES -->
+<section class="py-12 max-w-6xl mx-auto px-4">
+
+  <h2 data-reveal
+      class="text-4xl font-medium text-center text-gray-900 mb-2 opacity-0 translate-y-8 transition-all duration-700">
+    Conozca a nuestros profesionales
+  </h2>
+  <p data-reveal
+     class="text-2sm text-center text-gray-500 mb-8 opacity-0 translate-y-8 transition-all duration-700 delay-100">
+    Un equipo dedicado a su bienestar
+  </p>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div *ngFor="let d of doctors; let i = index"
+         data-reveal
+         [style]="'transition-delay:' + (i * 100) + 'ms'"
+         class="opacity-0 scale-95 transition-all duration-700 bg-white border border-gray-100 rounded-xl p-5 text-center hover:-translate-y-1.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 group">
+      <img [src]="d.img" [alt]="d.name"
+           class="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-2 border-gray-100 group-hover:border-blue-300 transition-colors duration-300" />
+      <h4 class="text-sm font-medium text-gray-900">{{ d.name }}</h4>
+      <p class="text-2xs text-blue-600 mt-0.5">{{ d.spec }}</p>
+      <p class="text-2xs text-gray-400 mt-2">📞 {{ d.tel }}</p>
+      <span class="inline-block mt-3 bg-emerald-50 text-emerald-700 text-2xs px-3 py-0.5 rounded-full">
+        Disponible hoy
+      </span>
+    </div>
+  </div>
+
+</section>
+<script>
+  /** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{html,ts}",
+  ],
+  safelist: [
+    'opacity-0',
+    'translate-y-4',
+    'translate-y-8',
+    'translate-x-8',
+    '-translate-x-8',
+    'scale-95',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+</script>

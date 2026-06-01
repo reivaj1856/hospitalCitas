@@ -1,0 +1,34 @@
+<nav class="bg-white shadow-lg sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex justify-between items-center h-20">
+      
+      <a routerLink="/" class="text-3xl font-bold text-blue-900 tracking-tighter">COCHA</a>
+      
+      <div class="hidden md:flex space-x-8 items-center font-medium">
+        <a routerLink="/" class="hover:text-blue-900 transition">Inicio</a>
+
+        @if (isAuthenticated) {
+          @if (userRole === 'admin') {
+            <a routerLink="/doctors" class="hover:text-blue-900 transition">Doctores</a>
+            <a routerLink="/admin" class="hover:text-blue-900 transition">Panel Admin</a>
+            
+          }
+          @if (userRole === 'staff') {
+            <a routerLink="/staff" class="hover:text-blue-900 transition">Recepción</a>
+          }
+          @if (userRole === 'doctor') {
+            <a routerLink="/doctor-dashboard" class="hover:text-blue-900 transition">Mi Consultorio</a>
+          }
+          
+          <button (click)="performLogout()" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-900 transition">
+            Cerrar Sesión
+          </button>
+        } @else {
+          <a routerLink="/login" class="bg-blue-900 text-white px-6 py-2 rounded-full hover:scale-105 transition-transform duration-300">
+            Iniciar Sesión
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+</nav>

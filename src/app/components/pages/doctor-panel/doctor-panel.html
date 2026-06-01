@@ -1,0 +1,169 @@
+<div class="doctor-panel">
+  <section class="doctor-panel__hero mb-8">
+    <div class="doctor-panel__cover">
+      <div class="doctor-panel__avatar">{{ currentUser?.email?.charAt(0).toUpperCase() }}</div>
+
+      <div class="doctor-panel__hero-copy">
+        <p class="doctor-panel__eyebrow">Panel del doctor</p>
+        <h1 class="doctor-panel__title">Mi calendario</h1>
+        <p class="doctor-panel__subtitle">Visualiza tus citas agrupadas por hora o en un calendario mensual.</p>
+      </div>
+    </div>
+
+    <div class="doctor-panel__view-toggle">
+      <button 
+        (click)="viewMode = 'today'; updateViewMode()" 
+        [class.doctor-panel__toggle-btn--active]="viewMode === 'today'"
+        class="doctor-panel__toggle-btn">
+        Hoy por hora
+      </button>
+      <button 
+        (click)="viewMode = 'month'; updateViewMode()" 
+        [class.doctor-panel__toggle-btn--active]="viewMode === 'month'"
+        class="doctor-panel__toggle-btn">
+        Mes completo
+      </button>
+      <button
+        (click)="openDoctorModal()"
+        class="doctor-panel__toggle-btn doctor-panel__toggle-btn--primary"
+        title="Registrar nueva cita">
+        Registrar cita
+      </button>
+    </div>
+  </section>
+
+  <!-- VISTA HOY: Citas agrupadas por hora -->
+  @if (viewMode === 'today') {
+    <section class="doctor-panel__today">
+      <div class="today-header">
+        <h2>Citas de hoy</h2>
+        @if (appointmentGroups.length === 0) {
+          <p class="today-empty">No hay citas agendadas para hoy</p>
+        }
+      </div>
+
+      @for (group of appointmentGroups; track group.hourLabel) {
+        <div class="time-group">
+          <div class="time-group__header">
+            <div>
+              <p class="time-group__eyebrow">Hora</p>
+              <h3 class="time-group__title">{{ group.hourLabel }}</h3>
+            </div>
+            <span class="time-group__count">{{ group.items.length }} cita(s)</span>
+          </div>
+
+          <div class="time-group__grid">
+            @for (app of group.items; track app.id) {
+              <article class="appointment-card">
+                <div class="appointment-card__top">
+                  <div class="appointment-card__avatar">{{ app.patients?.full_name?.charAt(0) ?? 'P' }}</div>
+                  <div class="appointment-card__meta">
+                    <p class="appointment-card__name">{{ app.patients?.full_name }}</p>
+                    <p class="appointment-card__submeta">{{ app.appointment_types?.name }}</p>
+                  </div>
+                </div>
+
+                <div class="appointment-card__body">
+                  <p class="appointment-card__line"><span>Hora</span>{{ formatHour(app.start_time) }}</p>
+                  <p class="appointment-card__line"><span>Estado</span>{{ app.status }}</p>
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- VISTA MES: Calendario -->
+  @if (viewMode === 'month') {
+    <section class="doctor-panel__month">
+      <div class="calendar-header">
+        <button (click)="previousMonth()" class="calendar-nav-btn">← Anterior</button>
+        <h2 class="calendar-title">{{ getMonthName() }}</h2>
+        <button (click)="nextMonth()" class="calendar-nav-btn">Siguiente →</button>
+      </div>
+
+      <div class="calendar-grid">
+        <div class="calendar-weekdays">
+          <div class="weekday">Dom</div>
+          <div class="weekday">Lun</div>
+          <div class="weekday">Mar</div>
+          <div class="weekday">Mié</div>
+          <div class="weekday">Jue</div>
+          <div class="weekday">Vie</div>
+          <div class="weekday">Sab</div>
+        </div>
+
+        <div class="calendar-days">
+          @for (day of calendarDays; track day.date.toISOString()) {
+            <div 
+              class="calendar-day"
+              [class.calendar-day--other-month]="!day.isCurrentMonth"
+              [class.calendar-day--has-appointments]="day.appointments.length > 0">
+              <div class="calendar-day__number">{{ day.dayOfMonth }}</div>
+              @if (day.appointments.length > 0) {
+                <div class="calendar-day__appointments">
+                  @for (apt of day.appointments; track apt.id) {
+                    <div class="calendar-apt">
+                      <span class="calendar-apt__time">{{ formatHour(apt.start_time) }}</span>
+                      <span class="calendar-apt__patient">{{ apt.patients?.full_name?.split(' ')[0] }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+</div>
+
+@if (showDoctorModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div (click)="closeDoctorModal()" class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+
+    <div class="bg-white/95 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-lg relative border border-white/50 modal-surface">
+      <div class="modal-top">
+        <div class="modal-top__icon">+</div>
+        <div>
+          <p class="modal-top__eyebrow">Nueva cita</p>
+          <h2 class="modal-top__title">Registrar cita rápida</h2>
+          <p class="modal-top__subtitle">Agenda una cita directamente desde tu panel.</p>
+        </div>
+      </div>
+
+      <div class="appointment-form">
+        <select [(ngModel)]="doctorNewAppointment.patient_id" class="appointment-form__field">
+          <option value="">Selecciona paciente</option>
+          @for (patient of patients; track patient.id) {
+            <option [value]="patient.id">{{ patient.full_name }}</option>
+          }
+        </select>
+
+        <select [(ngModel)]="doctorNewAppointment.type_id" class="appointment-form__field">
+          <option value="">Tipo de cita</option>
+          @for (type of appointmentTypes; track type.id) {
+            <option [value]="type.id">{{ type.name }}</option>
+          }
+        </select>
+
+        <input [(ngModel)]="doctorNewAppointment.start_time" type="datetime-local" class="appointment-form__field" />
+      </div>
+
+      @if (statusMessage) {
+        <p class="mt-4 font-semibold" [class.text-emerald-600]="isSuccess" [class.text-red-600]="!isSuccess">
+          {{ statusMessage }}
+        </p>
+      }
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button (click)="closeDoctorModal()" class="px-4 py-2 text-gray-500">Cerrar</button>
+        <button (click)="saveDoctorAppointment()" class="bg-blue-600 text-white px-4 py-2 rounded" [disabled]="isSavingAppointment">
+          {{ isSavingAppointment ? 'Guardando...' : 'Guardar cita' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,49 @@
+<section class="doctors-page">
+  <div class="doctors-page__hero">
+    <div>
+      <p class="doctors-page__eyebrow">Catálogo médico</p>
+      <h1 class="doctors-page__title">Doctores</h1>
+      <p class="doctors-page__subtitle">Pestaña independiente para revisar y registrar el equipo médico activo.</p>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="doctors-page__state">Cargando doctores...</div>
+  } @else if (errorMessage()) {
+    <div class="doctors-page__state doctors-page__state--error">{{ errorMessage() }}</div>
+  } @else {
+    <app-doctor-list [doctors]="doctors()" (registerDoctor)="openDoctorModal()"></app-doctor-list>
+  }
+</section>
+
+@if (isDoctorModalOpen) {
+  <div class="doctors-modal">
+    <div class="doctors-modal__backdrop" (click)="closeDoctorModal()"></div>
+
+    <div class="doctors-modal__card">
+      <h2 class="doctors-modal__title">Registrar doctor</h2>
+      <p class="doctors-modal__subtitle">Completa los campos que pide la tabla, pero el guardado aún no está implementado.</p>
+
+      <div class="doctors-modal__form">
+        <input [(ngModel)]="newDoctor.doctor_id" type="text" placeholder="nombre del doctor" class="doctors-modal__input">
+        <input [(ngModel)]="newDoctor.start_time" type="time" placeholder="start_time" class="doctors-modal__input">
+        <input [(ngModel)]="newDoctor.end_time" type="time" placeholder="end_time" class="doctors-modal__input">
+      </div>
+
+      @if (statusMessage()) {
+        <p class="doctors-modal__status" [class.doctors-modal__status--success]="isSuccess()" [class.doctors-modal__status--error]="!isSuccess()">
+          {{ statusMessage() }}
+        </p>
+      }
+
+      <div class="doctors-modal__actions">
+        <button type="button" class="doctors-modal__button doctors-modal__button--secondary" (click)="closeDoctorModal()">
+          Cancelar
+        </button>
+        <button type="button" class="doctors-modal__button doctors-modal__button--primary" (click)="saveDoctor()">
+          Guardar doctor
+        </button>
+      </div>
+    </div>
+  </div>
+}
