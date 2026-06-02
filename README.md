@@ -68,3 +68,7 @@ Para las pruebas de inicio de sesión puedes usar cualquiera de los siguientes u
 - doctor3@cocha.com
 - staff@cocha.com
 - admin@cocha.com
+
+contraseña para todos los usuarios
+password
+
